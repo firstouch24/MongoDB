@@ -1,4 +1,4 @@
-// ## /api/query.js
+// ## /api/query.js for First Touch
 // ## GET /api/read?db=mydb&collection=mycollection&name=John&fields=name,email  -->  To query collection filtering name by regex and displaying only name, email fields
 // ## GET /api/read?db=mydb&collection=mycollection&arrayField=value             -->  filter inside a 2D array for a specific element:
 
