@@ -12,7 +12,7 @@ export const config = {
 // Function to extract the desired columns from the CSV with added logging
 const extractColumnsFromCsv = (filePath) => {
   return new Promise((resolve, reject) => {
-    const extractedData = [];
+    let extractedData = [];
 
     // Log the file being processed
     console.log(`Processing file: ${filePath}`);
@@ -28,14 +28,13 @@ const extractColumnsFromCsv = (filePath) => {
     // Log the columns we are extracting
     console.log('Extracting columns:', columnMappings);
 
-    let isValidRow = false;
-
     // Read and parse the CSV file
+    let isValidRow = false;
     fs.createReadStream(filePath)
       .pipe(csv({ separator: ',' })) // Specify comma separator for the CSV
       .on('data', (row) => {
         // Log each row as it is read
-        console.log('Row:', row);
+        console.log('Row --> ', row);
 
         // Identify valid rows by checking specific columns
         if (row['D'] || row['J'] || row['M'] || row['S']) {
