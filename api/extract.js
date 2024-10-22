@@ -6,7 +6,6 @@ const readline = require('readline');     // core node.js function
 
 // Helper function to manually parse each row based on index
 const extractColumnsFromCsv = (filePath) => {
-  let trxndate = '';
   return new Promise((resolve, reject) => {
     let extractedData = [];
     let lineNumber = 0;
@@ -33,9 +32,8 @@ const extractColumnsFromCsv = (filePath) => {
       }
 
       // Extract data from the defined columns
-      if (trxndate == "") {   trxndate = row[3] || null;    }
       const col = {
-        'trxn_date': trxndate,        // Column D
+        'trxn_date': row[3] || null,        // Column D
         'sku_id': row[9] || null,           // Column J
         'sku_name': row[12] || null,        // Column M
         'qty': row[19] || null              // Column S (corrected to 19)
@@ -57,7 +55,6 @@ const extractColumnsFromCsv = (filePath) => {
   });
 };
 
-
 // Vercel API handler for file upload and CSV processing
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -75,7 +72,7 @@ export default async function handler(req, res) {
       console.log('File uploaded:', filePath);
 
       // Extract columns from the uploaded CSV file
-      extractcolumnsFromCsv(filePath)
+      extractColumnsFromCsv(filePath)
         .then((data) => {
           console.log('Extracted Data:', data);
           res.status(200).json({ extractedData: data });
@@ -130,7 +127,7 @@ export default async function handler__notWork(req, res) {
       console.log('File uploaded:', filePath);
 
       // Extract columns from the uploaded CSV file
-      extractcolumnsFromCsv(filePath)
+      extractColumnsFromCsv(filePath)
         .then((data) => {
           console.log('Extracted Data:', data);
           res.status(200).json({ extractedData: data });
@@ -146,7 +143,7 @@ export default async function handler__notWork(req, res) {
 }
 
 // Function to extract the desired columns from the CSV with added logging
-const extractcolumnsFromCsv__notWork = (filePath) => {
+const extractColumnsFromCsv__notWork = (filePath) => {
   return new Promise((resolve, reject) => {
     let extractedData = [];
 
@@ -178,19 +175,19 @@ const extractcolumnsFromCsv__notWork = (filePath) => {
         }
 
         if (isValidRow) {
-          const rec = {
-            'trxn date' : row[3] || null,       // column D (Sales Date)
-            'sku id'    : row[10] || null,      // column J (STOCK CODE)
-            'sku name'  : row[13] || null,      // column M (DESCRIPTION)
-            'qty'       : row[20] || null       // column S (Qty)
+          const col = {
+            'trxn date' : row[3] || null,       // Column D (Sales Date)
+            'sku id'    : row[10] || null,      // Column J (STOCK CODE)
+            'sku name'  : row[13] || null,      // Column M (DESCRIPTION)
+            'qty'       : row[20] || null       // Column S (Qty)
           };
 
           // Log the filtered row before adding it to the array
-          console.log('Filtered Row:', rec);
+          console.log('Filtered Row:', col);
 
           // Push rows that have at least one valid column
-          if (rec['trxn date'] || rec['sku id'] || rec['sku name'] || rec['qty']) {
-            extractedData.push(rec);
+          if (col['trxn date'] || col['sku id'] || col['sku name'] || col['qty']) {
+            extractedData.push(col);
           }
         }
       })
