@@ -1,7 +1,7 @@
 const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
+const readline = require('readline');     // core node.js function
 
 
 // Helper function to manually parse each row based on index
@@ -16,9 +16,9 @@ const extractColumnsFromCsv = (filePath) => {
     // Exact column mappings (physical columns in CSV by index)
     const columnMappings = {
       3: 'trxn date',     // Column D (Sales Date)
-      10: 'sku id',       // Column J (STOCK CODE)
-      13: 'sku name',     // Column M (DESCRIPTION)
-      19: 'qty',          // Column S (Qty is at index 19, not 20)
+      9: 'sku id',        // Column J (STOCK CODE)
+      12: 'sku name',     // Column M (DESCRIPTION)
+      18: 'qty',          // Column S (Qty is at index 19, not 20)
     };
 
     // Log the columns we are extracting
@@ -48,16 +48,16 @@ const extractColumnsFromCsv = (filePath) => {
       // Extract data from the defined columns
       const filteredRow = {
         'trxn date': row[3] || null,        // Column D
-        'sku id': row[10] || null,          // Column J
-        'sku name': row[13] || null,        // Column M
-        'qty': row[19] || null              // Column S (corrected to 19)
+        'sku id': row[9] || null,          // Column J
+        'sku name': row[10] || null,        // Column M
+        'qty': row[18] || null              // Column S (corrected to 19)
       };
 
       // Log the filtered row before adding it to the array
       console.log('Filtered Row:', filteredRow);
 
       // Only push valid rows that have at least one valid column
-      if (filteredRow['trxn date'] || filteredRow['sku id'] || filteredRow['sku name'] || filteredRow['qty']) {
+      if ( filteredRow['sku id']  &&  filteredRow['sku name']  &&  filteredRow['qty']) {
         extractedData.push(filteredRow);
       }
     });
