@@ -34,7 +34,7 @@ const extractColumnsFromCsv = (filePath) => {
       .pipe(csv({ separator: ',' })) // Specify comma separator for the CSV
       .on('data', (row) => {
         // Log each row as it is read
-        console.log('Raw Row --> ', row);
+        console.log('Raw Row --> ', row, '  >> SKU: ', row[10], ', DESC:', row[13], ', QTY: ', row[20]);
 
         // Identify valid rows by checking specific columns
         if (row[3] || row[10] || row[13] || row[20]) {
