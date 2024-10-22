@@ -5,7 +5,9 @@ const readline = require('readline');     // core node.js function
 
 
 // Helper function to manually parse each row based on index
-const extractColumnsFromCsv = (filePath) => {
+const extractcolumnsFromCsv = (filePath) => {
+  let trxnDate = '';
+
   return new Promise((resolve, reject) => {
     let extractedData = [];
     let lineNumber = 0;
@@ -21,26 +23,25 @@ const extractColumnsFromCsv = (filePath) => {
 
       // Split the line by commas (handling CSV format)
       const row = line.split(',');
-
-      // Log each line for debugging purposes
       console.log(`Line ${lineNumber}:`, row);
 
       // Skip header lines or invalid lines if needed
-      if (row.length < 30) {    // total 30 column
+      if (row.length < 35) {    // total 30 column
         console.log(`Skipping line ${lineNumber}: Not enough columns`);
         return; // Skip lines that don't match the expected column count
       }
 
       // Extract data from the defined columns
-      const col = {
-        'trxn_date': row[3] || null,        // Column D
-        'sku_id': row[9] || null,           // Column J
-        'sku_name': row[12] || null,        // Column M
-        'qty': row[19] || null              // Column S (corrected to 19)
+      if(trxnDate == "") {   trxnDate = row[3] || '';    }
+      const rec = {
+        'trxn_date': trxnDate,              // column D
+        'sku_id':    row[9]  || null,       // column J
+        'sku_name':  row[12] || null,       // column M
+        'qty':       row[19] || null        // column S (corrected to 19)
       };
 
-      console.log('Filtered Row:', col);    // Log the filtered row before adding it to the array
-      if ( col['sku_id']  &&  col['sku_name']  &&  col['qty']) {   extractedData.push(col);   }     // Only push valid rows that have at least one valid column
+      console.log('Filtered Row:', rec);    // Log the filtered row before adding it to the array
+      if ( rec['sku_id']  &&  rec['sku_name']  &&  rec['qty']) {   extractedData.push(rec);   }     // Only push valid rows that have at least one valid column
     });
 
     rl.on('close', () => {
@@ -72,7 +73,7 @@ export default async function handler(req, res) {
       console.log('File uploaded:', filePath);
 
       // Extract columns from the uploaded CSV file
-      extractColumnsFromCsv(filePath)
+      extractcolumnsFromCsv(filePath)
         .then((data) => {
           console.log('Extracted Data:', data);
           res.status(200).json({ extractedData: data });
@@ -127,7 +128,7 @@ export default async function handler__notWork(req, res) {
       console.log('File uploaded:', filePath);
 
       // Extract columns from the uploaded CSV file
-      extractColumnsFromCsv(filePath)
+      extractcolumnsFromCsv(filePath)
         .then((data) => {
           console.log('Extracted Data:', data);
           res.status(200).json({ extractedData: data });
@@ -143,7 +144,7 @@ export default async function handler__notWork(req, res) {
 }
 
 // Function to extract the desired columns from the CSV with added logging
-const extractColumnsFromCsv__notWork = (filePath) => {
+const extractcolumnsFromCsv__notWork = (filePath) => {
   return new Promise((resolve, reject) => {
     let extractedData = [];
 
@@ -175,19 +176,19 @@ const extractColumnsFromCsv__notWork = (filePath) => {
         }
 
         if (isValidRow) {
-          const col = {
-            'trxn date' : row[3] || null,       // Column D (Sales Date)
-            'sku id'    : row[10] || null,      // Column J (STOCK CODE)
-            'sku name'  : row[13] || null,      // Column M (DESCRIPTION)
-            'qty'       : row[20] || null       // Column S (Qty)
+          const rec = {
+            'trxn date' : row[3] || null,       // column D (Sales Date)
+            'sku id'    : row[10] || null,      // column J (STOCK CODE)
+            'sku name'  : row[13] || null,      // column M (DESCRIPTION)
+            'qty'       : row[20] || null       // column S (Qty)
           };
 
           // Log the filtered row before adding it to the array
-          console.log('Filtered Row:', col);
+          console.log('Filtered Row:', rec);
 
           // Push rows that have at least one valid column
-          if (col['trxn date'] || col['sku id'] || col['sku name'] || col['qty']) {
-            extractedData.push(col);
+          if (rec['trxn date'] || rec['sku id'] || rec['sku name'] || rec['qty']) {
+            extractedData.push(rec);
           }
         }
       })
