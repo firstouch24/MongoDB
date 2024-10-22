@@ -19,10 +19,10 @@ const extractColumnsFromCsv = (filePath) => {
 
     // Exact column mappings (these are the CSV fields, not Excel columns)
     const columnMappings = {
-      'D': 'trxn date',    // Sales Date
-      'J': 'sku id',       // STOCK CODE
-      'M': 'sku name',     // DESCRIPTION
-      'S': 'qty',          // Qty
+      3: 'trxn date',     // 'D': Sales Date
+      10: 'sku id',       // 'J': STOCK CODE
+      13: 'sku name',     // 'M': DESCRIPTION
+      20: 'qty',          // 'T': Qty
     };
 
     // Log the columns we are extracting
@@ -34,19 +34,19 @@ const extractColumnsFromCsv = (filePath) => {
       .pipe(csv({ separator: ',' })) // Specify comma separator for the CSV
       .on('data', (row) => {
         // Log each row as it is read
-        console.log('Row --> ', row);
+        console.log('Raw Row --> ', row);
 
         // Identify valid rows by checking specific columns
-        if (row['D'] || row['J'] || row['M'] || row['S']) {
-          isValidRow = true;  // Valid data starts here
+        if (row[3] || row[10] || row[13] || row[20]) {
+           isValidRow = true;  // Valid data starts here
         }
 
         if (isValidRow) {
           const filteredRow = {
-            'trxn date': row['D'] || null,     // Column D (Sales Date)
-            'sku id': row['J'] || null,        // Column J (STOCK CODE)
-            'sku name': row['M'] || null,      // Column M (DESCRIPTION)
-            'qty': row['S'] || null,           // Column S (Qty)
+            'trxn date' : row[3] || null,       // Column D (Sales Date)
+            'sku id'    : row[10] || null,      // Column J (STOCK CODE)
+            'sku name'  : row[13] || null,      // Column M (DESCRIPTION)
+            'qty'       : row[20] || null       // Column S (Qty)
           };
 
           // Log the filtered row before adding it to the array
