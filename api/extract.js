@@ -54,7 +54,7 @@ const extractColumnsFromCsv = (filePath) => {
 
     rl.on('close', () => {
       console.log('CSV file processing complete.');
-      resolve(extractedData);  // Return extracted data when parsing is complete
+      resolve({ extract: extractedData, trxndate: trxndate, count: extractedData.length || 0 });  // Return extracted data when parsing is complete
     });
 
     rl.on('error', (err) => {
@@ -76,22 +76,25 @@ export default async function handler(req, res) {
       }
 
       const filePath = files.file.filepath; // Get the path to the uploaded file
-
-      // Log the file path
       console.log('File uploaded:', filePath);
 
       // Ensure the correct function name is called
       extractColumnsFromCsv(filePath)
         .then((data) => {
           console.log('Extracted Data:', data);
-          res.status(200).json({ extractedData: data });
+          // res.status(200).json({ extractedData: data });
+          res.status(200).json({
+            status: 'ok',
+            message: `Csv extracted for date ${data.trxndate || ''}. Total rows is ${data.count || 0}`,
+            data: data.extract || {}
+          })
         })
         .catch((error) => {
           console.error('Error extracting columns from CSV:', error);
-          res.status(500).json({ error: 'Error processing the CSV file' });
+          res.status(500).json({ status: 'err', message: 'Error processing the CSV file', data: {} });
         });
     });
   } else {
-    res.status(405).json({ error: 'Method not allowed' }); // Only allow POST requests
+    res.status(405).json({ status: 'err', message: 'Method not allowed', data: {} }); // Only allow POST requests
   }
 }
