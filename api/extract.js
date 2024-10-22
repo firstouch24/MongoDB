@@ -1,6 +1,126 @@
 const formidable = require('formidable');
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
+
+
+// Helper function to manually parse each row based on index
+const extractColumnsFromCsv = (filePath) => {
+  return new Promise((resolve, reject) => {
+    let extractedData = [];
+    let lineNumber = 0;
+
+    // Log the file being processed
+    console.log(`Processing file: ${filePath}`);
+
+    // Exact column mappings (physical columns in CSV by index)
+    const columnMappings = {
+      3: 'trxn date',     // Column D (Sales Date)
+      10: 'sku id',       // Column J (STOCK CODE)
+      13: 'sku name',     // Column M (DESCRIPTION)
+      19: 'qty',          // Column S (Qty is at index 19, not 20)
+    };
+
+    // Log the columns we are extracting
+    console.log('Extracting columns:', columnMappings);
+
+    // Create a read stream to process CSV line by line
+    const rl = readline.createInterface({
+      input: fs.createReadStream(filePath),
+      crlfDelay: Infinity
+    });
+
+    rl.on('line', (line) => {
+      lineNumber++;
+
+      // Split the line by commas (handling CSV format)
+      const row = line.split(',');
+
+      // Log each line for debugging purposes
+      console.log(`Line ${lineNumber}:`, row);
+
+      // Skip header lines or invalid lines if needed
+      if (row.length < 20) {
+        console.log(`Skipping line ${lineNumber}: Not enough columns`);
+        return; // Skip lines that don't match the expected column count
+      }
+
+      // Extract data from the defined columns
+      const filteredRow = {
+        'trxn date': row[3] || null,        // Column D
+        'sku id': row[10] || null,          // Column J
+        'sku name': row[13] || null,        // Column M
+        'qty': row[19] || null              // Column S (corrected to 19)
+      };
+
+      // Log the filtered row before adding it to the array
+      console.log('Filtered Row:', filteredRow);
+
+      // Only push valid rows that have at least one valid column
+      if (filteredRow['trxn date'] || filteredRow['sku id'] || filteredRow['sku name'] || filteredRow['qty']) {
+        extractedData.push(filteredRow);
+      }
+    });
+
+    rl.on('close', () => {
+      console.log('CSV file processing complete.');
+      resolve(extractedData);  // Return extracted data when parsing is complete
+    });
+
+    rl.on('error', (err) => {
+      console.error('Error while processing CSV file:', err);
+      reject(err);  // Handle any errors
+    });
+  });
+};
+
+// Vercel API handler for file upload and CSV processing
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    const form = new formidable.IncomingForm();
+
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        console.error('Error parsing file upload:', err);
+        return res.status(500).json({ error: 'Error parsing the file upload' });
+      }
+
+      const filePath = files.file.filepath; // Get the path to the uploaded file
+
+      // Log the file path
+      console.log('File uploaded:', filePath);
+
+      // Extract columns from the uploaded CSV file
+      extractColumnsFromCsv(filePath)
+        .then((data) => {
+          console.log('Extracted Data:', data);
+          res.status(200).json({ extractedData: data });
+        })
+        .catch((error) => {
+          console.error('Error extracting columns from CSV:', error);
+          res.status(500).json({ error: 'Error processing the CSV file' });
+        });
+    });
+  } else {
+    res.status(405).json({ error: 'Method not allowed' }); // Only allow POST requests
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+// -----------------
+const formidable = require('formidable');
+const fs = require('fs');
+const path = require('path');
 const csv = require('csv-parser');
 
 export const config = {
@@ -9,8 +129,40 @@ export const config = {
   },
 };
 
+// Vercel API handler for file upload and CSV processing
+export default async function handler__notWork(req, res) {
+  if (req.method === 'POST') {
+    const form = new formidable.IncomingForm();
+
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        console.error('Error parsing file upload:', err);
+        return res.status(500).json({ error: 'Error parsing the file upload' });
+      }
+
+      const filePath = files.file.filepath; // Get the path to the uploaded file
+
+      // Log the file path
+      console.log('File uploaded:', filePath);
+
+      // Extract columns from the uploaded CSV file
+      extractColumnsFromCsv(filePath)
+        .then((data) => {
+          console.log('Extracted Data:', data);
+          res.status(200).json({ extractedData: data });
+        })
+        .catch((error) => {
+          console.error('Error extracting columns from CSV:', error);
+          res.status(500).json({ error: 'Error processing the CSV file' });
+        });
+    });
+  } else {
+    res.status(405).json({ error: 'Method not allowed' }); // Only allow POST requests
+  }
+}
+
 // Function to extract the desired columns from the CSV with added logging
-const extractColumnsFromCsv = (filePath) => {
+const extractColumnsFromCsv__notWork = (filePath) => {
   return new Promise((resolve, reject) => {
     let extractedData = [];
 
@@ -69,34 +221,5 @@ const extractColumnsFromCsv = (filePath) => {
   });
 };
 
-// Vercel API handler for file upload and CSV processing
-export default async function handler(req, res) {
-  if (req.method === 'POST') {
-    const form = new formidable.IncomingForm();
 
-    form.parse(req, (err, fields, files) => {
-      if (err) {
-        console.error('Error parsing file upload:', err);
-        return res.status(500).json({ error: 'Error parsing the file upload' });
-      }
-
-      const filePath = files.file.filepath; // Get the path to the uploaded file
-
-      // Log the file path
-      console.log('File uploaded:', filePath);
-
-      // Extract columns from the uploaded CSV file
-      extractColumnsFromCsv(filePath)
-        .then((data) => {
-          console.log('Extracted Data:', data);
-          res.status(200).json({ extractedData: data });
-        })
-        .catch((error) => {
-          console.error('Error extracting columns from CSV:', error);
-          res.status(500).json({ error: 'Error processing the CSV file' });
-        });
-    });
-  } else {
-    res.status(405).json({ error: 'Method not allowed' }); // Only allow POST requests
-  }
-}
+// */
