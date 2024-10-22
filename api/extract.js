@@ -10,20 +10,6 @@ const extractColumnsFromCsv = (filePath) => {
     let extractedData = [];
     let lineNumber = 0;
 
-    // Log the file being processed
-    console.log(`Processing file: ${filePath}`);
-
-    // Exact column mappings (physical columns in CSV by index)
-    const columnMappings = {
-      3: 'trxn date',     // Column D (Sales Date)
-      9: 'sku id',        // Column J (STOCK CODE)
-      12: 'sku name',     // Column M (DESCRIPTION)
-      18: 'qty',          // Column S (Qty is at index 19, not 20)
-    };
-
-    // Log the columns we are extracting
-    console.log('Extracting columns:', columnMappings);
-
     // Create a read stream to process CSV line by line
     const rl = readline.createInterface({
       input: fs.createReadStream(filePath),
@@ -40,26 +26,21 @@ const extractColumnsFromCsv = (filePath) => {
       console.log(`Line ${lineNumber}:`, row);
 
       // Skip header lines or invalid lines if needed
-      if (row.length < 20) {
+      if (row.length < 30) {    // total 30 column
         console.log(`Skipping line ${lineNumber}: Not enough columns`);
         return; // Skip lines that don't match the expected column count
       }
 
       // Extract data from the defined columns
-      const filteredRow = {
-        'trxn date': row[3] || null,        // Column D
-        'sku id': row[9] || null,          // Column J
-        'sku name': row[10] || null,        // Column M
-        'qty': row[18] || null              // Column S (corrected to 19)
+      const col = {
+        'trxn_date': row[3] || null,        // Column D
+        'sku_id': row[9] || null,           // Column J
+        'sku_name': row[12] || null,        // Column M
+        'qty': row[19] || null              // Column S (corrected to 19)
       };
 
-      // Log the filtered row before adding it to the array
-      console.log('Filtered Row:', filteredRow);
-
-      // Only push valid rows that have at least one valid column
-      if ( filteredRow['sku id']  &&  filteredRow['sku name']  &&  filteredRow['qty']) {
-        extractedData.push(filteredRow);
-      }
+      console.log('Filtered Row:', col);    // Log the filtered row before adding it to the array
+      if ( col['sku_id']  &&  col['sku_name']  &&  col['qty']) {   extractedData.push(col);   }     // Only push valid rows that have at least one valid column
     });
 
     rl.on('close', () => {
@@ -194,7 +175,7 @@ const extractColumnsFromCsv__notWork = (filePath) => {
         }
 
         if (isValidRow) {
-          const filteredRow = {
+          const col = {
             'trxn date' : row[3] || null,       // Column D (Sales Date)
             'sku id'    : row[10] || null,      // Column J (STOCK CODE)
             'sku name'  : row[13] || null,      // Column M (DESCRIPTION)
@@ -202,11 +183,11 @@ const extractColumnsFromCsv__notWork = (filePath) => {
           };
 
           // Log the filtered row before adding it to the array
-          console.log('Filtered Row:', filteredRow);
+          console.log('Filtered Row:', col);
 
           // Push rows that have at least one valid column
-          if (filteredRow['trxn date'] || filteredRow['sku id'] || filteredRow['sku name'] || filteredRow['qty']) {
-            extractedData.push(filteredRow);
+          if (col['trxn date'] || col['sku id'] || col['sku name'] || col['qty']) {
+            extractedData.push(col);
           }
         }
       })
